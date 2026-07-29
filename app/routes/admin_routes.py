@@ -19,8 +19,8 @@ def login():
     if not admin or not admin.check_password(password):
         return jsonify({'error': 'Invalid credentials'}), 401
 
-    access_token = create_access_token(identity=admin.id)
-    refresh_token = create_refresh_token(identity=admin.id)
+    access_token = create_access_token(identity=str(admin.id))
+    refresh_token = create_refresh_token(identity=str(admin.id))
 
     return jsonify({
         'access_token': access_token,
@@ -38,8 +38,8 @@ def logout():
 @admin_bp.route('/profile', methods=['GET'])
 @jwt_required()
 def profile():
-    admin_id = get_jwt_identity()
-    admin = Admin.query.get(admin_id)
+    admin_id = int(get_jwt_identity())
+    admin = db.session.get(Admin, admin_id)
     if not admin:
         return jsonify({'error': 'Admin not found'}), 404
     return jsonify(admin.to_dict()), 200
