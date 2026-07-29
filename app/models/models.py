@@ -1,8 +1,5 @@
-from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from ..extensions import db, bcrypt
-
-db = SQLAlchemy()
 
 
 class Admin(db.Model):
