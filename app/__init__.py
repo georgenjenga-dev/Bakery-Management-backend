@@ -2,10 +2,15 @@ from flask import Flask
 from flask_cors import CORS
 from app.extensions import db, migrate, bcrypt, jwt
 from config import Config
+from app.routes.payments import payments_bp
+from app.routes.admin_orders import admin_orders_bp
+
+
 
 def create_app():
     app = Flask(__name__)
-
+    app.register_blueprint(payments_bp)
+    app.register_blueprint(admin_orders_bp)
     app.config.from_object(Config)
     
     CORS(
