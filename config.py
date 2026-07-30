@@ -1,6 +1,8 @@
 import os
 from datetime import timedelta
 
+
+
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key'
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///bakery.db'
@@ -10,7 +12,6 @@ class Config:
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
 
-   
 from dotenv import load_dotenv
 
 load_dotenv()

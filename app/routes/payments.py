@@ -57,8 +57,6 @@ def stk_push():
         
         # Initiate STK Push
         phone = data['customer_phone']
-        if phone.startswith('0'):
-            phone = '254' + phone[1:]
         amount = data['total_amount']
         account_ref = f"ORDER-{order.id}"
         
