@@ -3,14 +3,12 @@ from flask_cors import CORS
 from app.extensions import db, migrate, bcrypt, jwt
 from config import Config
 from app.routes.payments import payments_bp
-from app.routes.admin_orders import admin_orders_bp
 
 
 
 def create_app():
     app = Flask(__name__)
     app.register_blueprint(payments_bp)
-    app.register_blueprint(admin_orders_bp)
     app.config.from_object(Config)
     
     CORS(
@@ -25,7 +23,8 @@ def create_app():
     jwt.init_app(app)
 
     # Import models so Flask-Migrate can detect them
-    from app.models.models import Product, Order, OrderItem, Admin
+    from app.models.models import Product, Admin
+    from app.models.order import Order, OrderItem
     
     from app.routes.admin_routes import admin_bp
     app.register_blueprint(admin_bp)
