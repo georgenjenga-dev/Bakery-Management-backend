@@ -1,13 +1,21 @@
 from flask import Flask
 from flask_cors import CORS
-from app.extensions import db, migrate, bcrypt, jwt
+
 from config import Config
+
+from app.extensions import (
+    db,
+    migrate,
+    bcrypt,
+    jwt
+)
+
 
 def create_app():
     app = Flask(__name__)
 
     app.config.from_object(Config)
-    
+
     CORS(
         app,
         resources={r"/*": {"origins": "http://localhost:5173"}},
@@ -19,10 +27,19 @@ def create_app():
     bcrypt.init_app(app)
     jwt.init_app(app)
 
-    # Import models so Flask-Migrate can detect them
-    from app.models.models import Product, Order, OrderItem, Admin
-    
+    from app.models.models import (
+        Admin,
+        Product,
+        Order,
+        OrderItem,
+    )
+
     from app.routes.admin_routes import admin_bp
+    from app.routes.product_routes import product_bp
+    from app.routes.order_routes import order_bp
+
     app.register_blueprint(admin_bp)
+    app.register_blueprint(product_bp)
+    app.register_blueprint(order_bp)
 
     return app
