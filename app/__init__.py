@@ -42,6 +42,8 @@ def create_app():
     from app.models.models import (
         Admin,
         Product,
+        Order,
+        OrderItem,
         ContactMessage,
     )
 
