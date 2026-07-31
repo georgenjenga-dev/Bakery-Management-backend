@@ -1,5 +1,4 @@
 from datetime import datetime
-from decimal import Decimal
 
 from ..extensions import db, bcrypt
 
@@ -88,101 +87,34 @@ class Product(db.Model):
         }
 
 
-class Order(db.Model):
-    __tablename__ = "orders"
+class ContactMessage(db.Model):
+    __tablename__ = "contact_messages"
 
     id = db.Column(db.Integer, primary_key=True)
 
-    customer_name = db.Column(
+    full_name = db.Column(
         db.String(120),
         nullable=False
     )
 
-    phone_number = db.Column(
-        db.String(20),
+    email = db.Column(
+        db.String(120),
         nullable=False
     )
 
-    delivery_address = db.Column(
+    subject = db.Column(
+        db.String(200),
+        nullable=False
+    )
+
+    message = db.Column(
         db.Text,
         nullable=False
-    )
-
-    total_price = db.Column(
-        db.Numeric(10, 2),
-        nullable=False,
-        default=Decimal("0.00")
-    )
-
-    status = db.Column(
-        db.String(20),
-        nullable=False,
-        default="Pending"
     )
 
     created_at = db.Column(
         db.DateTime,
         default=datetime.utcnow
-    )
-
-    order_items = db.relationship(
-        "OrderItem",
-        back_populates="order",
-        cascade="all, delete-orphan",
-        lazy=True
-    )
-
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "customer_name": self.customer_name,
-            "phone_number": self.phone_number,
-            "delivery_address": self.delivery_address,
-            "total_price": float(self.total_price),
-            "status": self.status,
-            "created_at": self.created_at.isoformat(),
-            "items": [
-                item.to_dict()
-                for item in self.order_items
-            ],
-        }
-
-
-class OrderItem(db.Model):
-    __tablename__ = "order_items"
-
-    id = db.Column(db.Integer, primary_key=True)
-
-    order_id = db.Column(
-        db.Integer,
-        db.ForeignKey("orders.id"),
-        nullable=False
-    )
-
-    product_id = db.Column(
-        db.Integer,
-        db.ForeignKey("products.id"),
-        nullable=False
-    )
-
-    quantity = db.Column(
-        db.Integer,
-        nullable=False
-    )
-
-    unit_price = db.Column(
-        db.Numeric(10, 2),
-        nullable=False
-    )
-
-    order = db.relationship(
-        "Order",
-        back_populates="order_items"
-    )
-
-    product = db.relationship(
-        "Product",
-        back_populates="order_items"
     )
 
     def to_dict(self):

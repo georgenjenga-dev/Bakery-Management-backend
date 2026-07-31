@@ -1,6 +1,6 @@
 import logging
 from flask import Blueprint, request, jsonify
-from app import db
+from app.extensions import db
 from app.models.order import Order, OrderItem
 from app.services.mpesa import MpesaService
 
@@ -12,8 +12,81 @@ logger = logging.getLogger(__name__)
 @payments_bp.route('/stk-push', methods=['POST'])
 def stk_push():
     """
-    Initiate M-Pesa STK Push payment.
-    Expects JSON with customer details and order items.
+    Initiate M-Pesa STK Push payment
+    ---
+    tags:
+      - Payments
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          required:
+            - customer_name
+            - customer_email
+            - customer_phone
+            - delivery_address
+            - items
+            - total_amount
+          properties:
+            customer_name:
+              type: string
+              example: "Jane Wanjiru"
+            customer_email:
+              type: string
+              example: "jane@example.com"
+            customer_phone:
+              type: string
+              example: "254712345678"
+            delivery_address:
+              type: string
+              example: "Kilimani, Nairobi"
+            total_amount:
+              type: number
+              example: 1500.00
+            items:
+              type: array
+              items:
+                type: object
+                required:
+                  - product_id
+                  - product_name
+                  - quantity
+                  - unit_price
+                properties:
+                  product_id:
+                    type: integer
+                    example: 1
+                  product_name:
+                    type: string
+                    example: "Chocolate Cake"
+                  quantity:
+                    type: integer
+                    example: 2
+                  unit_price:
+                    type: number
+                    example: 750.00
+    responses:
+      200:
+        description: STK Push sent successfully
+        schema:
+          type: object
+          properties:
+            success:
+              type: boolean
+            message:
+              type: string
+            checkout_request_id:
+              type: string
+            merchant_request_id:
+              type: string
+            order_id:
+              type: integer
+      400:
+        description: Missing required field
+      500:
+        description: Failed to initiate payment
     """
     try:
         data = request.get_json()
@@ -92,8 +165,31 @@ def stk_push():
 @payments_bp.route('/callback', methods=['POST'])
 def mpesa_callback():
     """
-    Handle M-Pesa callback from Safaricom.
-    This endpoint must be publicly accessible.
+    Handle M-Pesa callback from Safaricom
+    ---
+    tags:
+      - Payments
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          description: M-Pesa callback payload from Safaricom
+    responses:
+      200:
+        description: Callback accepted
+        schema:
+          type: object
+          properties:
+            ResultCode:
+              type: integer
+              example: 0
+            ResultDesc:
+              type: string
+              example: "Accepted"
+      400:
+        description: Invalid callback data
     """
     try:
         callback_data = request.get_json()
@@ -141,8 +237,36 @@ def mpesa_callback():
 @payments_bp.route('/status/<checkout_request_id>', methods=['GET'])
 def check_payment_status(checkout_request_id):
     """
-    Check payment status by CheckoutRequestID.
-    Frontend polls this endpoint.
+    Check payment status by CheckoutRequestID
+    ---
+    tags:
+      - Payments
+    parameters:
+      - in: path
+        name: checkout_request_id
+        required: true
+        type: string
+        description: The M-Pesa CheckoutRequestID
+    responses:
+      200:
+        description: Payment status details
+        schema:
+          type: object
+          properties:
+            success:
+              type: boolean
+            status:
+              type: string
+            order_id:
+              type: integer
+            receipt_number:
+              type: string
+            amount:
+              type: number
+      404:
+        description: Order not found
+      500:
+        description: Failed to check status
     """
     try:
         order = Order.query.filter_by(checkout_request_id=checkout_request_id).first()

@@ -30,6 +30,38 @@ product_bp = Blueprint(
 def products():
     """
     GET /products
+    ---
+    tags:
+      - Products
+    responses:
+      200:
+        description: List of all products
+        schema:
+          type: object
+          properties:
+            success:
+              type: boolean
+            data:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  description:
+                    type: string
+                  price:
+                    type: number
+                  stock:
+                    type: integer
+                  image:
+                    type: string
+                  category:
+                    type: string
+                  created_at:
+                    type: string
     """
 
     products = get_all_products()
@@ -39,6 +71,23 @@ def products():
 
 @product_bp.get("/<int:product_id>")
 def single_product(product_id):
+    """
+    GET /products/<product_id>
+    ---
+    tags:
+      - Products
+    parameters:
+      - in: path
+        name: product_id
+        required: true
+        type: integer
+        description: The product ID
+    responses:
+      200:
+        description: Product details
+      404:
+        description: Product not found
+    """
 
     product = get_product(product_id)
 
@@ -50,6 +99,23 @@ def single_product(product_id):
 
 @product_bp.get("/search")
 def search():
+    """
+    GET /products/search
+    ---
+    tags:
+      - Products
+    parameters:
+      - in: query
+        name: q
+        required: true
+        type: string
+        description: Search keyword
+    responses:
+      200:
+        description: Search results
+      400:
+        description: Search keyword is required
+    """
 
     keyword = request.args.get("q")
 
@@ -65,6 +131,21 @@ def search():
 
 @product_bp.get("/category/<string:category>")
 def category_products(category):
+    """
+    GET /products/category/<category>
+    ---
+    tags:
+      - Products
+    parameters:
+      - in: path
+        name: category
+        required: true
+        type: string
+        description: Product category name
+    responses:
+      200:
+        description: Products in the category
+    """
 
     products = get_products_by_category(category)
 
@@ -74,6 +155,52 @@ def category_products(category):
 @product_bp.post("/")
 @admin_required()
 def add_product():
+    """
+    POST /products
+    ---
+    tags:
+      - Products
+    security:
+      - admin: []
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          required:
+            - name
+            - price
+            - stock
+          properties:
+            name:
+              type: string
+              example: "Chocolate Cake"
+            description:
+              type: string
+              example: "Rich chocolate cake with ganache"
+            price:
+              type: number
+              example: 2500.00
+            stock:
+              type: integer
+              example: 50
+            image:
+              type: string
+              example: "https://example.com/cake.jpg"
+            category:
+              type: string
+              example: "Cakes"
+    responses:
+      201:
+        description: Product created successfully
+      400:
+        description: Validation error
+      401:
+        description: Admin authentication required
+      403:
+        description: Super admin required
+    """
 
     data = request.get_json()
 
@@ -94,6 +221,47 @@ def add_product():
 @product_bp.put("/<int:product_id>")
 @admin_required()
 def edit_product(product_id):
+    """
+    PUT /products/<product_id>
+    ---
+    tags:
+      - Products
+    security:
+      - admin: []
+    parameters:
+      - in: path
+        name: product_id
+        required: true
+        type: integer
+        description: The product ID
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          properties:
+            name:
+              type: string
+            description:
+              type: string
+            price:
+              type: number
+            stock:
+              type: integer
+            image:
+              type: string
+            category:
+              type: string
+    responses:
+      200:
+        description: Product updated successfully
+      400:
+        description: Validation error
+      401:
+        description: Admin authentication required
+      404:
+        description: Product not found
+    """
 
     product = get_product(product_id)
 
@@ -124,6 +292,27 @@ def edit_product(product_id):
 @product_bp.delete("/<int:product_id>")
 @admin_required()
 def remove_product(product_id):
+    """
+    DELETE /products/<product_id>
+    ---
+    tags:
+      - Products
+    security:
+      - admin: []
+    parameters:
+      - in: path
+        name: product_id
+        required: true
+        type: integer
+        description: The product ID
+    responses:
+      200:
+        description: Product deleted successfully
+      401:
+        description: Admin authentication required
+      404:
+        description: Product not found
+    """
 
     product = get_product(product_id)
 
@@ -134,5 +323,9 @@ def remove_product(product_id):
         )
 
     delete_product(product)
+
+    return success_response(
+        message="Product deleted successfully"
+    )
 
    

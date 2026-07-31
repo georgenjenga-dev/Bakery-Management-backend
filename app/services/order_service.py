@@ -1,7 +1,7 @@
 from decimal import Decimal
 
 from app.extensions import db
-from app.models.models import Order, OrderItem, Product
+from app.models.order import Order, OrderItem
 
 
 def get_all_orders():

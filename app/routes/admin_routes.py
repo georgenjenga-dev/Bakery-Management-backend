@@ -3,7 +3,7 @@ from datetime import datetime
 from flask import Blueprint, request, jsonify
 import logging
 from flask import Blueprint, jsonify, request
-from app import db
+from app.extensions import db
 from app.models.order import Order, OrderItem
 from flask_jwt_extended import (
     create_access_token,
@@ -36,6 +36,47 @@ admin_bp = Blueprint(
 
 @admin_bp.route("/login", methods=["POST"])
 def login():
+    """
+    POST /api/admin/login
+    Authenticate an admin and receive JWT tokens
+    ---
+    tags:
+      - Admin Auth
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          required:
+            - email
+            - password
+          properties:
+            email:
+              type: string
+              example: "admin@bakery.com"
+            password:
+              type: string
+              example: "securepassword123"
+    responses:
+      200:
+        description: Login successful
+        schema:
+          type: object
+          properties:
+            access_token:
+              type: string
+            refresh_token:
+              type: string
+            admin:
+              type: object
+      400:
+        description: Email and password are required
+      401:
+        description: Invalid credentials
+      403:
+        description: Admin account is deactivated
+    """
     data = request.get_json()
 
     email = data.get("email")
@@ -79,6 +120,18 @@ def login():
 @admin_bp.route("/logout", methods=["POST"])
 @jwt_required()
 def logout():
+    """
+    POST /api/admin/logout
+    Invalidate the current JWT token
+    ---
+    tags:
+      - Admin Auth
+    security:
+      - admin: []
+    responses:
+      200:
+        description: Logout successful
+    """
     response = jsonify({
         "message": "Successfully logged out."
     })
@@ -91,6 +144,22 @@ def logout():
 @admin_bp.route("/profile", methods=["GET"])
 @admin_required()
 def profile():
+    """
+    GET /api/admin/profile
+    Get the current admin's profile
+    ---
+    tags:
+      - Admin Auth
+    security:
+      - admin: []
+    responses:
+      200:
+        description: Admin profile details
+      401:
+        description: Admin authentication required
+      404:
+        description: Admin not found
+    """
     admin_id = int(get_jwt_identity())
 
     admin = db.session.get(Admin, admin_id)
@@ -106,6 +175,18 @@ def profile():
 @admin_bp.route("/test", methods=["GET"])
 @admin_required()
 def test_admin():
+    """
+    GET /api/admin/test
+    Test admin access
+    ---
+    tags:
+      - Admin Auth
+    security:
+      - admin: []
+    responses:
+      200:
+        description: Admin access granted
+    """
     return jsonify({
         "message": "Admin access granted."
     }), 200
@@ -114,6 +195,18 @@ def test_admin():
 @admin_bp.route("/admins", methods=["GET"])
 @admin_required()
 def list_admins():
+    """
+    GET /api/admin/admins
+    List all admins
+    ---
+    tags:
+      - Admin Management
+    security:
+      - admin: []
+    responses:
+      200:
+        description: List of all admins
+    """
     admins = get_all_admins()
     return jsonify(admins), 200
 
@@ -121,6 +214,48 @@ def list_admins():
 @admin_bp.route("/admins", methods=["POST"])
 @super_admin_required()
 def add_admin():
+    """
+    POST /api/admin/admins
+    Create a new admin (Super admin only)
+    ---
+    tags:
+      - Admin Management
+    security:
+      - super_admin: []
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          required:
+            - username
+            - email
+            - password
+          properties:
+            username:
+              type: string
+              example: "newadmin"
+            email:
+              type: string
+              example: "newadmin@bakery.com"
+            password:
+              type: string
+              example: "securepassword123"
+            role:
+              type: string
+              enum: [admin, super_admin]
+              example: "admin"
+    responses:
+      201:
+        description: Admin created successfully
+      400:
+        description: Creation failed
+      401:
+        description: Admin authentication required
+      403:
+        description: Super admin required
+    """
     data = request.get_json()
 
     result = create_admin(data)
@@ -134,6 +269,30 @@ def add_admin():
 @admin_bp.route("/admins/<int:admin_id>/deactivate", methods=["PATCH"])
 @super_admin_required()
 def disable_admin(admin_id):
+    """
+    PATCH /api/admin/admins/<admin_id>/deactivate
+    Deactivate an admin (Super admin only)
+    ---
+    tags:
+      - Admin Management
+    security:
+      - super_admin: []
+    parameters:
+      - in: path
+        name: admin_id
+        required: true
+        type: integer
+        description: The admin ID
+    responses:
+      200:
+        description: Admin deactivated successfully
+      401:
+        description: Admin authentication required
+      403:
+        description: Super admin required
+      404:
+        description: Admin not found
+    """
     result = deactivate_admin(admin_id)
 
     if not result["success"]:
@@ -145,6 +304,30 @@ def disable_admin(admin_id):
 @admin_bp.route("/admins/<int:admin_id>/activate", methods=["PATCH"])
 @super_admin_required()
 def enable_admin(admin_id):
+    """
+    PATCH /api/admin/admins/<admin_id>/activate
+    Activate an admin (Super admin only)
+    ---
+    tags:
+      - Admin Management
+    security:
+      - super_admin: []
+    parameters:
+      - in: path
+        name: admin_id
+        required: true
+        type: integer
+        description: The admin ID
+    responses:
+      200:
+        description: Admin activated successfully
+      401:
+        description: Admin authentication required
+      403:
+        description: Super admin required
+      404:
+        description: Admin not found
+    """
     result = activate_admin(admin_id)
 
     if not result["success"]:
@@ -156,6 +339,43 @@ def enable_admin(admin_id):
 @admin_bp.route("/admins/<int:admin_id>/reset-password", methods=["PATCH"])
 @super_admin_required()
 def change_admin_password(admin_id):
+    """
+    PATCH /api/admin/admins/<admin_id>/reset-password
+    Reset an admin's password (Super admin only)
+    ---
+    tags:
+      - Admin Management
+    security:
+      - super_admin: []
+    parameters:
+      - in: path
+        name: admin_id
+        required: true
+        type: integer
+        description: The admin ID
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          required:
+            - password
+          properties:
+            password:
+              type: string
+              example: "newsecurepassword123"
+    responses:
+      200:
+        description: Password reset successfully
+      400:
+        description: Password is required
+      401:
+        description: Admin authentication required
+      403:
+        description: Super admin required
+      404:
+        description: Admin not found
+    """
     data = request.get_json()
 
     password = data.get("password")
@@ -173,16 +393,12 @@ def change_admin_password(admin_id):
 
     if not result["success"]:
         return jsonify(result), 404
-
     return jsonify(result), 200
-    return jsonify({'message': 'Admin access granted'}), 200
-
-
 
 
 import logging
 from flask import Blueprint, jsonify, request
-from app import db
+from app.extensions import db
 from app.models.order import Order, OrderItem
 
 admin_orders_bp = Blueprint('admin_orders', __name__, url_prefix='/api/admin/orders')
@@ -191,7 +407,37 @@ logger = logging.getLogger(__name__)
 
 @admin_orders_bp.route('/', methods=['GET'])
 def get_all_orders():
-    """Get all orders with optional filtering."""
+    """
+    GET /api/admin/orders
+    Get all orders with optional filtering
+    ---
+    tags:
+      - Admin Orders
+    parameters:
+      - in: query
+        name: status
+        required: false
+        type: string
+        enum: [Pending, Paid, Cancelled]
+        description: Filter by payment status
+      - in: query
+        name: page
+        required: false
+        type: integer
+        default: 1
+        description: Page number
+      - in: query
+        name: per_page
+        required: false
+        type: integer
+        default: 20
+        description: Items per page
+    responses:
+      200:
+        description: Paginated list of orders
+      500:
+        description: Failed to fetch orders
+    """
     try:
         status_filter = request.args.get('status')
         page = request.args.get('page', 1, type=int)
@@ -220,7 +466,26 @@ def get_all_orders():
 
 @admin_orders_bp.route('/<int:order_id>', methods=['GET'])
 def get_order(order_id):
-    """Get single order details."""
+    """
+    GET /api/admin/orders/<order_id>
+    Get single order details
+    ---
+    tags:
+      - Admin Orders
+    parameters:
+      - in: path
+        name: order_id
+        required: true
+        type: integer
+        description: The order ID
+    responses:
+      200:
+        description: Order details
+      404:
+        description: Order not found
+      500:
+        description: Failed to fetch order
+    """
     try:
         order = Order.query.get_or_404(order_id)
         return jsonify({
@@ -234,7 +499,38 @@ def get_order(order_id):
 
 @admin_orders_bp.route('/<int:order_id>/status', methods=['PUT'])
 def update_order_status(order_id):
-    """Update order payment status (admin only)."""
+    """
+    PUT /api/admin/orders/<order_id>/status
+    Update order payment status
+    ---
+    tags:
+      - Admin Orders
+    parameters:
+      - in: path
+        name: order_id
+        required: true
+        type: integer
+        description: The order ID
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          required:
+            - status
+          properties:
+            status:
+              type: string
+              enum: [Pending, Paid, Cancelled]
+              example: "Paid"
+    responses:
+      200:
+        description: Status updated successfully
+      400:
+        description: Invalid status value
+      500:
+        description: Failed to update status
+    """
     try:
         data = request.get_json()
         new_status = data.get('status')
@@ -265,7 +561,18 @@ def update_order_status(order_id):
 
 @admin_orders_bp.route('/stats', methods=['GET'])
 def get_order_stats():
-    """Get order statistics for dashboard."""
+    """
+    GET /api/admin/orders/stats
+    Get order statistics for dashboard
+    ---
+    tags:
+      - Admin Orders
+    responses:
+      200:
+        description: Order statistics
+      500:
+        description: Failed to fetch statistics
+    """
     try:
         total_orders = Order.query.count()
         paid_orders = Order.query.filter_by(payment_status='Paid').count()
