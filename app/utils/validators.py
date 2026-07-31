@@ -142,3 +142,29 @@ def validate_order(data):
         return valid, error
 
     return True, None
+def validate_email(email):
+
+    pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+
+    if not re.match(pattern, email):
+        return False, "Invalid email address"
+
+    return True, None
+
+
+def validate_contact(data):
+
+    valid, error = validate_required_fields(
+        data,
+        [
+            "full_name",
+            "email",
+            "subject",
+            "message"
+        ]
+    )
+
+    if not valid:
+        return valid, error
+
+    return validate_email(data["email"])
