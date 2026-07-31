@@ -32,14 +32,17 @@ def create_app():
         Product,
         Order,
         OrderItem,
+        ContactMessage,
     )
 
     from app.routes.admin_routes import admin_bp
     from app.routes.product_routes import product_bp
     from app.routes.order_routes import order_bp
+    from app.routes.contact_routes import contact_bp
 
     app.register_blueprint(admin_bp)
     app.register_blueprint(product_bp)
     app.register_blueprint(order_bp)
+    app.register_blueprint(contact_bp)
 
     return app

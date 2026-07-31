@@ -179,3 +179,42 @@ class OrderItem(db.Model):
             "quantity": self.quantity,
             "unit_price": float(self.unit_price),
         }
+class ContactMessage(db.Model):
+    __tablename__ = "contact_messages"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    full_name = db.Column(
+        db.String(120),
+        nullable=False
+    )
+
+    email = db.Column(
+        db.String(120),
+        nullable=False
+    )
+
+    subject = db.Column(
+        db.String(200),
+        nullable=False
+    )
+
+    message = db.Column(
+        db.Text,
+        nullable=False
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "full_name": self.full_name,
+            "email": self.email,
+            "subject": self.subject,
+            "message": self.message,
+            "created_at": self.created_at.isoformat()
+        }    
