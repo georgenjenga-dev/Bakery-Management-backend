@@ -1,13 +1,9 @@
 venv/
-
-instance/
-
-.env
-
 __pycache__/
-
 *.pyc
-
+instance/
+.env
+migrations/__pycache__/
 *.sqlite3
-
 *.db
+uploads/
