@@ -73,7 +73,6 @@ def create_app():
 
     with app.app_context():
         try:
-            db.create_all()
             if not Admin.query.filter_by(email="admin@bakery.com").first():
                 admin = Admin(username="admin", email="admin@bakery.com", role="super_admin")
                 admin.set_password("admin123")
