@@ -30,12 +30,17 @@ def create_app():
         "http://localhost:5173",
         "http://127.0.0.1:5173",
         "http://127.0.0.1:5000",
+        "https://bakery-management-frontend-dh1c.onrender.com",
+        "https://bakery-management-frontend-41cl.onrender.com",
     ]
 
-    frontend_url = os.getenv("FRONTEND_URL")
-
-    if frontend_url:
-        allowed_origins.append(frontend_url)
+    # Supports a single URL or a comma-separated list, e.g.:
+    # FRONTEND_URL=https://my-frontend.onrender.com,https://mycustomdomain.com
+    frontend_url_env = os.getenv("FRONTEND_URL")
+    if frontend_url_env:
+        allowed_origins.extend(
+            url.strip() for url in frontend_url_env.split(",") if url.strip()
+        )
 
     CORS(
         app,
@@ -69,24 +74,11 @@ def create_app():
     # Register Blueprints
     # ==================================================
     app.register_blueprint(payments_bp)
-
     app.register_blueprint(admin_bp)
     app.register_blueprint(admin_orders_bp)
-
-    app.register_blueprint(
-        product_bp,
-        url_prefix="/api/products"
-    )
-
-    app.register_blueprint(
-        order_bp,
-        url_prefix="/api/orders"
-    )
-
-    app.register_blueprint(
-        contact_bp,
-        url_prefix="/api/contact"
-    )
+    app.register_blueprint(product_bp, url_prefix="/api/products")
+    app.register_blueprint(order_bp, url_prefix="/api/orders")
+    app.register_blueprint(contact_bp, url_prefix="/api/contact")
 
     # ==================================================
     # Seed Database
@@ -95,33 +87,28 @@ def create_app():
         try:
             seed_admin()
             seed_products()
-
         except Exception as e:
-            app.logger.warning(
-                f"Database initialization warning: {e}"
-            )
+            app.logger.warning(f"Database initialization warning: {e}")
 
     # ==================================================
     # Health Check
     # ==================================================
     @app.get("/")
     def index():
-        return jsonify(
-            {
-                "message": "Bakery Management API",
-                "status": "online",
-                "database": "PostgreSQL",
-                "version": "1.0.0",
-                "endpoints": {
-                    "products": "/api/products",
-                    "orders": "/api/orders",
-                    "payments": "/api/payments",
-                    "admin": "/api/admin",
-                    "contact": "/api/contact",
-                    "swagger": "/apidocs/",
-                },
-            }
-        ), 200
+        return jsonify({
+            "message": "Bakery Management API",
+            "status": "online",
+            "database": "PostgreSQL",
+            "version": "1.0.0",
+            "endpoints": {
+                "products": "/api/products",
+                "orders": "/api/orders",
+                "payments": "/api/payments",
+                "admin": "/api/admin",
+                "contact": "/api/contact",
+                "swagger": "/apidocs/",
+            },
+        }), 200
 
     return app
 
@@ -130,33 +117,17 @@ def create_app():
 # Seed Default Admin
 # ============================================================
 def seed_admin():
+    admin_email = os.getenv("ADMIN_EMAIL", "admin@bakery.com")
 
-    if Admin.query.filter_by(
-        email=os.getenv(
-            "ADMIN_EMAIL",
-            "admin@bakery.com"
-        )
-    ).first():
+    if Admin.query.filter_by(email=admin_email).first():
         return
 
     admin = Admin(
-        username=os.getenv(
-            "ADMIN_USERNAME",
-            "admin"
-        ),
-        email=os.getenv(
-            "ADMIN_EMAIL",
-            "admin@bakery.com"
-        ),
+        username=os.getenv("ADMIN_USERNAME", "admin"),
+        email=admin_email,
         role="super_admin",
     )
-
-    admin.set_password(
-        os.getenv(
-            "ADMIN_PASSWORD",
-            "admin123"
-        )
-    )
+    admin.set_password(os.getenv("ADMIN_PASSWORD", "admin123"))
 
     db.session.add(admin)
     db.session.commit()
@@ -166,12 +137,10 @@ def seed_admin():
 # Seed Products
 # ============================================================
 def seed_products():
-
     if Product.query.first():
         return
 
     products = [
-
         Product(
             name="Chocolate Cake",
             description="Rich chocolate sponge layered with creamy chocolate frosting.",
@@ -180,7 +149,6 @@ def seed_products():
             image="https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600",
             category="Cake",
         ),
-
         Product(
             name="Croissant",
             description="Fresh buttery croissant with a flaky crust.",
@@ -189,7 +157,6 @@ def seed_products():
             image="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSoAfVdKKxy4oIF9yOGG7mYNm7URUao4-uDeTO4uj2Syw&s=10",
             category="Pastry",
         ),
-
         Product(
             name="Vanilla Cupcake",
             description="Vanilla cupcake topped with buttercream frosting.",
@@ -198,7 +165,6 @@ def seed_products():
             image="https://images.unsplash.com/photo-1486427944299-d1955d23e34d?w=600",
             category="Cupcake",
         ),
-
         Product(
             name="French Bread",
             description="Freshly baked French bread.",
@@ -207,7 +173,6 @@ def seed_products():
             image="https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600",
             category="Bread",
         ),
-
         Product(
             name="Donuts",
             description="Soft donuts glazed with chocolate and vanilla icing.",
@@ -216,7 +181,6 @@ def seed_products():
             image="https://images.unsplash.com/photo-1551024601-bec78aea704b?w=600",
             category="Pastry",
         ),
-
         Product(
             name="Cookies",
             description="Crunchy chocolate chip cookies baked daily.",
