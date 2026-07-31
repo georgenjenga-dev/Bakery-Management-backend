@@ -3,6 +3,7 @@ __pycache__/
 *.pyc
 instance/
 .env
+.env example
 migrations/__pycache__/
 *.sqlite3
 *.db
