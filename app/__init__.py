@@ -49,7 +49,14 @@ def create_app():
         }
     })
 
-    from app.models.models import Product, Admin, ContactMessage
+    from app.models.models import (
+        Admin,
+        Product,
+        ContactMessage,
+    )
+
+    # Import models so Flask-Migrate can detect them
+    from app.models.models import Product, Admin
     from app.models.order import Order, OrderItem
     
     from app.routes.admin_routes import admin_bp, admin_orders_bp
@@ -66,7 +73,6 @@ def create_app():
 
     with app.app_context():
         try:
-            db.create_all()
             if not Admin.query.filter_by(email="admin@bakery.com").first():
                 admin = Admin(username="admin", email="admin@bakery.com", role="super_admin")
                 admin.set_password("admin123")

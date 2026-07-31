@@ -1,4 +1,5 @@
 from datetime import datetime
+from app.extensions import db
 
 from ..extensions import db, bcrypt
 
@@ -86,7 +87,6 @@ class Product(db.Model):
             "created_at": self.created_at.isoformat(),
         }
 
-
 class ContactMessage(db.Model):
     __tablename__ = "contact_messages"
 
@@ -126,3 +126,4 @@ class ContactMessage(db.Model):
             "message": self.message,
             "created_at": self.created_at.isoformat()
         }    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
