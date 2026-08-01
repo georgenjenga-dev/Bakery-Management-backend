@@ -1,142 +1,262 @@
-# Sweet Delicacy Bakery — Frontend
+# Sweet Delicacy Bakery — Backend
 
-## Project Overview
+##  Project Overview
 
-The **Sweet Delicacy Bakery Management System** is a responsive web application that provides customers with an easy and convenient way to explore bakery products and place orders online.
+The **Sweet Delicacy Bakery Management System Backend** is a Flask-based backend application that provides the server-side functionality required by the bakery management system.
 
-The frontend is responsible for providing the user interface through which customers can browse products, search for products, view product details, add products to a shopping cart, place orders, and proceed to payment.
+It manages bakery products, customer orders, inventory-related information, and administrative operations through a relational database.
 
-The application also provides interfaces for administrators to manage bakery products and customer orders.
+The backend works together with the React frontend to provide customers with an online platform for browsing bakery products and placing orders, while administrators can securely manage products, inventory, and customer orders.
 
-## Features
+##  Backend Features
 
-### Customer Features
+### Customer Operations
 
-* Browse available bakery products
-* Search for bakery products
+The backend supports functionality required for customers to:
+
+* Browse bakery products
+* Search for products
 * View product details
 * Add products to a shopping cart
-* Manage products in the shopping cart
-* Place customer orders
+* Place orders
 * Proceed to payment
-* Use a responsive interface across different screen sizes
 
-### Administrator Features
+These customer features form part of the overall bakery solution described in the project documentation.
 
-The frontend provides interfaces that support administrative operations such as:
+### Administrator Operations
+
+The backend supports administrative functionality including:
 
 * Secure administrator login
-* Add new bakery products
-* Edit product information
-* Delete products
-* Upload product images
-* View customer orders
-* Update order status
-* Monitor inventory
+* Adding new bakery products
+* Editing product information
+* Deleting products
+* Uploading product images
+* Viewing customer orders
+* Updating order status
+* Monitoring inventory
 
-##  Technologies Used
+## 🛠️ Technologies Used
 
-* **React** — Frontend JavaScript library
-* **Tailwind CSS** — Styling and responsive UI
-* **JavaScript** — Application logic
-* **REST API** — Communication with the Flask backend
-* **Vercel** — Frontend deployment platform
+* **Python** — Backend programming language
+* **Flask** — Web application framework
+* **Flask-SQLAlchemy** — Database ORM
+* **SQLite** — Relational database
+* **REST API** — Communication with the React frontend
+* **Render** — Backend deployment platform
 
-## Frontend Structure
+The project documentation specifically identifies Flask-SQLAlchemy and SQLite as the backend/database technologies.
 
-A typical project structure is:
+##  Backend Structure
+
+A typical Flask backend structure can be organized as:
 
 ```text
-frontend/
-├── public/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   ├── assets/
-│   ├── App.jsx
-│   └── main.jsx
-├── package.json
-├── tailwind.config.js
-├── postcss.config.js
+backend/
+├── app/
+│   ├── __init__.py
+│   ├── models/
+│   ├── routes/
+│   ├── controllers/
+│   └── ...
+├── instance/
+│   └── database.db
+├── config.py
+├── run.py
+├── requirements.txt
+├── .env
 └── README.md
 ```
 
-> The exact folder structure may differ depending on the implementation of the project.
+> The exact structure should match the actual backend repository.
 
-##  Installation and Setup
+## Installation and Setup
 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/georgenjenga-dev/Bakery-management-frontend.git
+git clone https://github.com/georgenjenga-dev/Bakery-Management-backend.git
 ```
 
-### 2. Install Dependencies
+### 2. Create a Virtual Environment
+
+Linux/macOS:
 
 ```bash
-npm install
+python3 -m venv venv
+source venv/bin/activate
 ```
 
-### 3. Configure Backend API
 
-The frontend communicates with the Flask backend to retrieve products, manage orders, and perform other application operations.
+### 3. Install Dependencies
 
-If the project uses an environment variable for the backend URL, create an environment file such as:
-
-```text
-.env
+```bash
+pip install -r requirements.txt
 ```
 
-and configure the backend API URL according to your project setup.
+If a `requirements.txt` file does not yet exist, the project should include the Flask and Flask-SQLAlchemy dependencies required by the implementation.
+
+### 4. Configure Environment Variables
+
+Create a `.env` file for environment-specific configuration.
 
 Example:
 
 ```env
-VITE_API_URL=https://bakery-management-backend-1.onrender.com
+FLASK_APP=app
+FLASK_ENV=development
+SECRET_KEY=your-secret-key
+DATABASE_URL=sqlite:///bakery.db
 ```
 
-> Use the actual variable name and backend URL configured in your project.
+> Use the actual configuration variables defined by your backend code. Do not commit sensitive `.env` values to GitHub.
 
-### 4. Start the Development Server
+### 5. Initialize the Database
+
+The backend uses **SQLite** as its database technology.
+
+Run the database initialization or migration command required by your implementation.
+
+For example, if the project uses Flask-Migrate:
 
 ```bash
-npm run dev
+flask db upgrade
 ```
 
-The application will normally be available through the local development URL displayed in your terminal.
+> Use the database command actually implemented in the project.
 
-## Backend Integration
+### 6. Run the Backend
 
-The frontend communicates with the Flask backend to support operations such as:
+Depending on how the Flask application is configured:
 
-* Retrieving bakery products
-* Searching products
-* Viewing product information
-* Managing shopping cart information
-* Creating customer orders
-* Processing order-related operations
-* Retrieving customer orders
-* Supporting administrator product management
-* Updating order status
+```bash
+flask run
+```
 
-The backend uses **Flask-SQLAlchemy** with **SQLite** as the database technology.
+or:
+
+```bash
+python run.py
+```
+
+The backend will normally be available at:
+
+```text
+http://127.0.0.1:5000
+```
+
+##  API Responsibilities
+
+The backend provides the server-side functionality required by the frontend.
+
+Its responsibilities include:
+
+### Products
+
+* Retrieve bakery products
+* Search bakery products
+* Retrieve product details
+* Add products
+* Update product information
+* Delete products
+* Handle product images
+
+### Orders
+
+* Create customer orders
+* Retrieve customer orders
+* Allow administrators to view orders
+* Update order status
+
+### Inventory
+
+* Store product-related inventory information
+* Allow administrators to monitor inventory
+* Support inventory management operations
+
+### Authentication
+
+* Provide secure administrator authentication
+* Protect administrator functionality from unauthorized access
+
+The project documentation identifies secure administrator login, product management, order management, and inventory monitoring as administrator functionality.
+
+## Database
+
+The backend uses:
+
+**Database:** SQLite
+**ORM:** Flask-SQLAlchemy
+
+The relational database is responsible for storing and managing the application's data efficiently, supporting product, order, and operational management.
+
+##  Security
+
+The backend should:
+
+* Keep secret keys in environment variables
+* Protect administrator routes
+* Validate incoming data
+* Avoid exposing sensitive configuration
+* Prevent `.env` files from being committed to Git
+* Restrict administrative operations to authorized users
 
 ## Deployment
 
-The frontend is intended to be deployed separately from the backend.
+The backend is intended to be deployed independently from the React frontend.
 
-### Frontend Deployment
+**Deployment platform:** Render
 
-**Platform:** Render
+The project document provides the following backend deployment:
 
-The project documentation provides the following deployed frontend:
+**Sweet Delicacy Bakery Backend:**
+https://bakery-management-backend-1.onrender.com/
 
-**Sweet Delicacy Bakery Frontend:**
-https://bakery-management-frontend-41cl.onrender.com/
+The project documentation identifies Render as the backend deployment platform.
 
-##  Project Purpose
+## Frontend Integration
 
-The frontend helps replace manual bakery ordering processes with an online platform where customers can conveniently browse products and place orders. This addresses challenges such as misplaced orders, stock inconsistencies, and delayed customer service.
+The backend communicates with the React frontend through API requests.
+
+The frontend uses the backend to access functionality related to:
+
+```text
+Products
+    ↓
+Product Details
+    ↓
+Shopping Cart
+    ↓
+Orders
+    ↓
+Payment
+```
+
+Administrators use the backend to manage:
+
+```text
+Admin Login
+    ↓
+Product Management
+    ↓
+Inventory Monitoring
+    ↓
+Customer Orders
+    ↓
+Order Status Updates
+```
+
+## Project Objective
+
+The backend helps transform traditional manual bakery operations into an organized online management system.
+
+The solution is designed to improve:
+
+* Order processing
+* Product management
+* Inventory management
+* Customer service
+* Overall bakery operational efficiency
 
 ##  Contributors
 
@@ -145,6 +265,6 @@ The frontend helps replace manual bakery ordering processes with an online platf
 * Baker Joshua
 * Baker Kelvin
 
-##  License
+## License
 
 This project was developed as a bakery management system project. Add the appropriate license here if the project is released publicly.
